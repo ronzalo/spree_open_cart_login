@@ -4,11 +4,14 @@ Spree::User.class_eval do
 
   def valid_password?(password_input)
     return true if devise_valid_password?(password_input)
-    return false unless Digest::SHA1.hexdigest("#{password_salt}#{Digest::SHA1.hexdigest("#{password_salt}#{Digest::SHA1.hexdigest(password_input)}")}") == encrypted_password
-
+    return false unless Digest::MD5.hexdigest(password_input)
+    
     logger.info "User #{email} is using the old password hashing method, updating attribute."
-    self.password = password_input
-    self.save!
+    # Only save if user pass has 6 characters or more
+    if password_input.length >= 6
+      self.password = password_input
+      self.save!
+    end
     true
   end
 
